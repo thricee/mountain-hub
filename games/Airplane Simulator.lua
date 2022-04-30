@@ -28,7 +28,7 @@ end)
 
 local Promise = import('modules/promise.lua')
 local Maid = import('modules/maid.lua')
-local orionLib = import('modules/orionLibrary.lua')
+local venyxLibrary = import('modules/venyx.lua').new('Airplane Simulator')
 
 local game = game
 local getService = game.GetService
@@ -136,21 +136,9 @@ local function setSettings(yield: boolean)
                             rawset(planeSettings, 'PlaneModel', planeModel)
                             print('Set setting of ' .. tostring(setting) .. ' to ' .. tostring(value))
                         else
-                            orionLib:MakeNotification({
-                                Name = "Alert",
-                                Content = "Make sure you actually input a number. | Setting: " .. setting,
-                                Image = "rbxassetid://4483345998",
-                                Time = 3
-                            })
+                            venyxLibrary:Notify('Alert', 'Make sure you actually input a number value for ' .. setting)
                         end
                     end
-                end
-
-
-                print('CURRENT PLANE SETTINGS!')
-
-                for i, v in pairs(planeSettings) do
-                    print(i, v)
                 end
 
                 Resolve()
@@ -280,83 +268,79 @@ addToQueue(function()
     end
 end, 'AutoTask')
 
+local venyxTextboxes = {}
+local venyxToggles = {}
+
+local planeTab = venyxLibrary:addPage('Plane')
+local defaultSection = planeTab:addSection('Default')
+local settingsSection = planeTab:addSection('Settings')
+
 local function resetPlaneSettings()
-    print('Reset settings called!')
     getPlane():andThen(function(planeModel: Model)
-        print('Found plane model!')
         local storedPlane = vehicles:FindFirstChild(planeModel.Name)
         
         if storedPlane then
-            print('Found stored plane!')
             local storedPlaneSettings = require(storedPlane.PlaneSettings)
-            print('Got stored plane settings!')
             for settingName, defaultValue in pairs(storedPlaneSettings) do
                 print('Set: ' .. settingName .. ' to: ' .. tostring(defaultValue))
                 wantedPlaneSettings[settingName] = defaultValue
+
+                local textbox, toggle = venyxTextboxes[settingName], venyxToggles[settingName]
+                if textbox then
+                    settingsSection:updateTextbox(textbox, 'Set ' .. settingName, defaultValue)
+                elseif toggle then
+                    settingsSection:updateToggle(toggle, 'Toggle ' .. settingName, defaultValue)
+                end
+
             end
-            print('Set all the default to wantedPlaneSettings!')
             setSettings():awaitStatus()
-            print('Set settings!')
+
             wantedPlaneSettings = {isExploitTable = true}
-            print('Set wantedPlaneSettings to normal!')
         end
     end):catch(warn)
 end
 
 -- // UI Library.
 
-local mainWindow = orionLib:MakeWindow({Name = 'Airplane Simulator'})
-
-local planeTab = mainWindow:MakeTab({
-    Name = 'Plane',
-    Icon = 'rbxassetid://9486014527',
-    PremiumOnly = false
-})
-
-planeTab:AddButton({
-	Name = "Default Settings",
-	Callback = function()
-      	resetPlaneSettings()
-  	end    
-})
+defaultSection:addButton('Default Settings', function()
+    resetPlaneSettings()
+end)
 
 for propertyName, propertyType in pairs(customizableSettings) do
     if propertyType == 'Number' then
-        planeTab:AddTextbox({
-            Name = "Set " .. propertyName,
-            TextDisappear = false,
-            Callback = function(Value)
+        local textbox = settingsSection:addTextbox('Set ' .. propertyName, '', function(Value, FocusLost)
+            if FocusLost then
                 wantedPlaneSettings[propertyName] = tonumber(Value)
                 setSettings()
             end
-        })
+        end)
+
+        venyxTextboxes[propertyName] = textbox
     elseif propertyType == 'Boolean' then
-        planeTab:AddToggle({
-            Name = "Toggle " .. propertyName,
-            Callback = function(Value)
-                wantedPlaneSettings[propertyName] = Value
+        local index = 0
+        local toggle = settingsSection:addToggle('Toggle ' .. propertyName, false, function(Value)
+            if index <= 0 then
+                index += 1
+            else
+                wantedPlaneSettings[propertyName] = tonumber(Value)
                 setSettings()
-            end    
-        })
+            end
+        end)
+
+        venyxToggles[propertyName] = toggle
     end
 end
 
-local autoTab = mainWindow:MakeTab({
-    Name = 'Automation',
-    Icon = 'rbxassetid://311226872',
-    PremiumOnly = false
-})
+local autoTab = venyxLibrary:addPage('Automation')
+local tasksSection = autoTab:addSection('Tasks')
 
-autoTab:AddToggle({
-    Name = 'Complete Tasks',
-    Callback = function(Value)
-        doTask = Value
+tasksSection:addToggle('Complete Tasks', false, function(Value)
+    doTask = Value
         if not doTask then
             teleportMaid:DoCleaning()
             isTeleporting = false
         end
-    end
-})
+end)
 
 -- // Background activity
 
@@ -366,4 +350,4 @@ runService.Heartbeat:Connect(function()
     end
 end)
 
-orionLib:Init()
+-- // venyx:SelectPage(venyx.pages[1], true)
