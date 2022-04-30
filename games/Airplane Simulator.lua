@@ -151,27 +151,31 @@ end
 local wantedPlaneSettings = {isExploitTable = true}
 
 local function setSettings(yield: boolean)
-    getPlane():andThen(function(planeModel: Model)
-        getPlaneSettings(planeModel, yield):andThen(function(planeSettings: planeSettings)
-            for setting, value in pairs(wantedPlaneSettings) do
-                local hasSetting = rawget(planeSettings, setting)
-                if customizableSettings[setting] and (hasSetting ~= value or setting == 'NoStuntMode') then
-                    if typeof(value) == customizableSettings[setting]:lower() then
-                        rawset(planeSettings, setting, value)
-                        rawset(planeSettings, 'PlaneModel', planeModel)
-                        print('Set setting of ' .. tostring(setting) .. ' to ' .. tostring(value))
-                    else
-                        orionLib:MakeNotification({
-                            Name = "Alert",
-                            Content = "Make sure you actually input a number. | Setting: " .. setting,
-                            Image = "rbxassetid://4483345998",
-                            Time = 3
-                        })
+    return Promise.new(function(Resolve, Reject)
+        getPlane():andThen(function(planeModel: Model)
+            getPlaneSettings(planeModel, yield):andThen(function(planeSettings: planeSettings)
+                for setting, value in pairs(wantedPlaneSettings) do
+                    local hasSetting = rawget(planeSettings, setting)
+                    if customizableSettings[setting] and (hasSetting ~= value or setting == 'NoStuntMode') then
+                        if typeof(value) == customizableSettings[setting]:lower() then
+                            rawset(planeSettings, setting, value)
+                            rawset(planeSettings, 'PlaneModel', planeModel)
+                            print('Set setting of ' .. tostring(setting) .. ' to ' .. tostring(value))
+                        else
+                            orionLib:MakeNotification({
+                                Name = "Alert",
+                                Content = "Make sure you actually input a number. | Setting: " .. setting,
+                                Image = "rbxassetid://4483345998",
+                                Time = 3
+                            })
+                        end
                     end
                 end
-            end
+
+                Resolve()
+            end):catch(warn)
         end):catch(warn)
-    end):catch(warn)
+    end)
 end
 
 spawnedVehicles.ChildAdded:Connect(function(child)
@@ -310,8 +314,8 @@ local function resetPlaneSettings()
                 wantedPlaneSettings[settingName] = defaultValue
             end
             print('Set all the default to wantedPlaneSettings!')
-            setSettings()
-            print('Setting settings!')
+            setSettings():awaitStatus()
+            print('Set settings!')
             wantedPlaneSettings = {isExploitTable = true}
             print('Set wantedPlaneSettings to normal!')
         end
