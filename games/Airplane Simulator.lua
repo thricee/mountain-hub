@@ -15,17 +15,6 @@ local function import(path: string)
     return loadstring(httpRequest.Body)()
 end
 
-local httpHook
-httpHook = hookfunction(game.HttpGet, function(self,...)
-   local Args = {...}
-   if Args[1] and type(Args[1]) == "string" then
-       if Args[1]:match("checkPremium.php") then
-           return "true"
-       end
-   end
-   return httpHook(self,...)
-end)
-
 local Promise = import('modules/promise.lua')
 local Maid = import('modules/maid.lua')
 local venyxLibrary = import('modules/venyx.lua').new('Airplane Simulator')
