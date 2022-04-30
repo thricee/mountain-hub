@@ -296,20 +296,16 @@ addToQueue(function()
 end, 'AutoTask')
 
 local function resetPlaneSettings()
-    print('Reset settings called!')
     getPlane():andThen(function(planeModel: Model)
-        print('Found plane!')
-        local storedPlane = vehicles:FindFirstChild(planeModel)
+        local storedPlane = vehicles:FindFirstChild(planeModel.Name)
         
         if storedPlane then
-            print('Found stored plane!')
             local storedPlaneSettings = require(storedPlane.PlaneSettings)
             for settingName, defaultValue in pairs(storedPlaneSettings) do
                 wantedPlaneSettings[settingName] = defaultValue
             end
             setSettings()
             wantedPlaneSettings = {isExploitTable = true}
-            print('Settings should be resetted!')
         end
     end):catch(warn)
 end
