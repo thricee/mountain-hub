@@ -25,7 +25,7 @@ end)
 
 local Promise = import('modules/promise.lua')
 local Maid = import('modules/maid.lua')
-local orionLib = import('modules/promise')
+local orionLib = import('modules/orionLibrary.lua')
 
 local game = game
 local getService = game.GetService
