@@ -1,9 +1,15 @@
-local function import()
+local gitToken = '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'
+local function import(path: string)
+    local httpRequest = syn.request({
+        Url = 'https://api.github.com/repos/Voutastic/mountain-hub/contents/' .. path,
+        Method = 'GET',
+        Headers = {
+            ["Authorization"] = 'token ' .. gitToken,
+            ['Accept'] = 'application/vnd.github.v4.raw'
+        }
+    })
     
-end
-
-if not Promise then
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/stellar-4242/Source/main/Promise.lua'))(); getgenv().Promise = require("{AB02623B-DEB2-4994-8732-BF44E3FDCFBC}")
+    return loadstring(httpRequest.Body)()
 end
 
 local httpHook
@@ -17,9 +23,9 @@ httpHook = hookfunction(game.HttpGet, function(self,...)
    return httpHook(self,...)
 end)
 
-local orionLib = loadstring(game:HttpGet(('https://hypernite.xyz/Backup/Orion/source.lua')))()
-
-local Maid = loadstring(game:HttpGet('https://raw.githubusercontent.com/Quenty/NevermoreEngine/main/src/maid/src/Shared/Maid.lua'))()
+local Promise = import('modules/promise.lua')
+local Maid = import('modules/maid.lua')
+local orionLib = import('modules/promise')
 
 local game = game
 local getService = game.GetService
