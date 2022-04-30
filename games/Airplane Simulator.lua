@@ -54,32 +54,6 @@ local resetContracts: RemoteEvent = replicatedStorage.ResetContracts
 local heartbeatQueue = {}
 local registeredPlanes = {}
 
-type planeSettings = {
-	MaxBankY: number,
-	MaxBankZ: number,
-	TurnSpeed: number,
-	MaxVelocity: number,
-	Acceleration: number,
-	SpeedDifferential: number,
-	StallSpeed: number,
-	StallRecoverReq: number,
-	ButterHeight: number,
-	MaxButterAngle: number,
-	MaxAltitude: number,
-	Offset: Vector3,
-	ShakeEffectStrength: number,
-	WindEffectStrength: number,
-	CameraDelayEffect: number,
-	AdvancedXSpeed: number,
-	AdvancedZSpeed: number,
-	AdvancedRotSpeed: number,
-	ForwardCamOffset: number,
-	FlightSoundPitchIncrease: number,
-	FlightSoundVolumeIncrease: number,
-	WindPitchIncrease: number,
-	NoStuntMode: boolean
-}
-
 local customizableSettings = {
     MaxBankY = "Number",
 	MaxBankZ = "Number",
@@ -153,7 +127,7 @@ local wantedPlaneSettings = {isExploitTable = true}
 local function setSettings(yield: boolean)
     return Promise.new(function(Resolve, Reject)
         getPlane():andThen(function(planeModel: Model)
-            getPlaneSettings(planeModel, yield):andThen(function(planeSettings: planeSettings)
+            getPlaneSettings(planeModel, yield):andThen(function(planeSettings)
                 for setting, value in pairs(wantedPlaneSettings) do
                     local hasSetting = rawget(planeSettings, setting)
                     if customizableSettings[setting] and (hasSetting ~= value or setting == 'NoStuntMode') then
@@ -170,6 +144,13 @@ local function setSettings(yield: boolean)
                             })
                         end
                     end
+                end
+
+
+                print('CURRENT PLANE SETTINGS!')
+
+                for i, v in pairs(planeSettings) do
+                    print(i, v)
                 end
 
                 Resolve()
