@@ -46,6 +46,7 @@ local unloadDestinations: Folder = workspace.UnloadDestinations
 local vacationDestinations: Folder = workspace.Destinations
 local airportDestinations: Folder = workspace.AirportDestinations
 local clientContracts: Folder = client.Contracts
+local vehicles: Folder = replicatedStorage.Vehicles
 
 local selectContract: RemoteEvent = replicatedStorage.SelectContract
 local resetContracts: RemoteEvent = replicatedStorage.ResetContracts
@@ -294,6 +295,21 @@ addToQueue(function()
     end
 end, 'AutoTask')
 
+local function resetPlaneSettings()
+    getPlane():andThen(function(planeModel: Model)
+        local storedPlane = vehicles:FindFirstChild(planeModel)
+        
+        if storedPlane then
+            local planeSettings: planeSettings = require(storedPlane.PlaneSettings)
+            for defaultSetting, defaultValue in pairs(planeSettings) do
+                wantedPlaneSettings[defaultSetting] = defaultValue
+            end
+            setSettings()
+            wantedPlaneSettings = {isExploitTable = true}
+        end
+    end):catch(warn)
+end
+
 -- // UI Library.
 
 local mainWindow = orionLib:MakeWindow({Name = 'Airplane Simulator'})
@@ -302,6 +318,13 @@ local planeTab = mainWindow:MakeTab({
     Name = 'Plane',
     Icon = 'rbxassetid://9486014527',
     PremiumOnly = false
+})
+
+planeTab:AddButton({
+	Name = "Default Settings",
+	Callback = function()
+      	resetPlaneSettings()
+  	end    
 })
 
 for propertyName, propertyType in pairs(customizableSettings) do
