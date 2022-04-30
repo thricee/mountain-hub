@@ -306,7 +306,7 @@ local function resetPlaneSettings()
             local storedPlaneSettings = require(storedPlane.PlaneSettings)
             print('Got stored plane settings!')
             for settingName, defaultValue in pairs(storedPlaneSettings) do
-                print('Set: ' .. settingName .. ' to: ' .. defaultValue)
+                print('Set: ' .. settingName .. ' to: ' .. tostring(defaultValue))
                 wantedPlaneSettings[settingName] = defaultValue
             end
             print('Set all the default to wantedPlaneSettings!')
