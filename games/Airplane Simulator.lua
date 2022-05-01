@@ -82,14 +82,22 @@ local function getPlane()
     end)
 end
 
-local function getPlaneSettings(planeModel: Model, yield: boolean)
+local function getPlaneSettings(planeModel: Model, doYield: boolean)
     return Promise.new(function(Resolve, Reject)
         repeat
             task.wait()
             for _, v in pairs(getgc(true)) do
                 if typeof(v) == 'table' then
+
+                    if rawget(v, 'PlaneDeleted') then
+                        v = {}
+                        continue
+                    elseif rawget(v, 'isExploitTable') then
+                        continue
+                    end
+
                     local maxVelocity, maxAltitude, acceleration = rawget(v, 'MaxVelocity'), rawget(v, 'MaxAltitude'), rawget(v, 'Acceleration')
-                    if maxVelocity and typeof(maxVelocity) == 'number' and maxAltitude and typeof(maxAltitude) == 'number' and acceleration and typeof(acceleration) == 'number' and not rawget(v, 'isExploitTable') and not rawget(v, 'PlaneDeleted') then
+                    if maxVelocity and typeof(maxVelocity) == 'number' and maxAltitude and typeof(maxAltitude) == 'number' and acceleration and typeof(acceleration) == 'number' then
 
                         if not planeModel:GetAttribute('PlaneId') then
                             local planeId = httpService:GenerateGUID(false)
@@ -97,13 +105,13 @@ local function getPlaneSettings(planeModel: Model, yield: boolean)
                             registeredPlanes[planeId] = v
                         end
 
-                        yield = false
+                        doYield = false
                         Resolve(v)
                         break
                     end
                 end
             end
-        until not yield
+        until not doYield
     end)
 end
 
@@ -113,19 +121,19 @@ end
 
 local wantedPlaneSettings = {isExploitTable = true}
 
-local function setSettings(yield: boolean)
+local function setSettings(doYield: boolean)
     return Promise.new(function(Resolve, Reject)
         getPlane():andThen(function(planeModel: Model)
-            getPlaneSettings(planeModel, yield):andThen(function(planeSettings)
+            getPlaneSettings(planeModel, doYield):andThen(function(planeSettings)
+                rawset(planeSettings, 'PlaneModel', planeModel)
                 for setting, value in pairs(wantedPlaneSettings) do
                     local hasSetting = rawget(planeSettings, setting)
                     if customizableSettings[setting] and (hasSetting ~= value or setting == 'NoStuntMode') then
                         if typeof(value) == customizableSettings[setting]:lower() then
                             rawset(planeSettings, setting, value)
-                            rawset(planeSettings, 'PlaneModel', planeModel)
                             print('Set setting of ' .. tostring(setting) .. ' to ' .. tostring(value))
                         else
-                            venyxLibrary:Notify('Alert', 'Make sure you actually input a number value for ' .. setting)
+                            venyxLibrary:Notify('Alert', 'Make sure you actually input a ' ..  customizableSettings[setting]:lower() .. ' value for ' .. setting)
                         end
                     end
                 end
@@ -282,7 +290,10 @@ local function resetPlaneSettings()
                 end
 
             end
+
+            storedPlaneSettings['isExploitTable'] = true
             setSettings():awaitStatus()
+            storedPlaneSettings['isExploitTable'] = nil
 
             wantedPlaneSettings = {isExploitTable = true}
         end
