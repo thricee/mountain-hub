@@ -306,16 +306,9 @@ for propertyName, propertyType in pairs(customizableSettings) do
 
         venyxTextboxes[propertyName] = textbox
     elseif propertyType == 'Boolean' then
-        local index = 0
         local toggle = settingsSection:addToggle('Toggle ' .. propertyName, false, function(Value)
-            print('Callback called!')
-            if index <= 0 then
-                index += 1
-            else
-                print('Setted!')
-                wantedPlaneSettings[propertyName] = Value
-                setSettings()
-            end
+            wantedPlaneSettings[propertyName] = Value
+            setSettings()
         end)
 
         venyxToggles[propertyName] = toggle
@@ -331,6 +324,13 @@ tasksSection:addToggle('Complete Tasks', false, function(Value)
             teleportMaid:DoCleaning()
             isTeleporting = false
         end
+end)
+
+local settingsPage = venyxLibrary:addPage('Settings')
+local bindsSection = settingsPage:addSection('Binds')
+
+bindsSection:addKeybind('Toggle UI', Enum.KeyCode.H, function()
+    venyxLibrary:toggle()
 end)
 
 -- // Background activity
