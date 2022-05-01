@@ -308,10 +308,12 @@ for propertyName, propertyType in pairs(customizableSettings) do
     elseif propertyType == 'Boolean' then
         local index = 0
         local toggle = settingsSection:addToggle('Toggle ' .. propertyName, false, function(Value)
+            print('Callback called!')
             if index <= 0 then
                 index += 1
             else
-                wantedPlaneSettings[propertyName] = tonumber(Value)
+                print('Setted!')
+                wantedPlaneSettings[propertyName] = Value
                 setSettings()
             end
         end)
