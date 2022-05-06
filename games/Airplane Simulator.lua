@@ -1,17 +1,14 @@
-local function import(path: string)
-
+local function import(path)
     local formatPath = table.concat(path:split(' '), '%20')
-
-    --[[local httpRequest = syn.request({
-        Url = 'https://api.github.com/repos/Voutastic/mountain-hub/contents/' .. formatPath,
+    local httpRequest = syn.request({
+        Url = 'http://localhost:3000/exports/' .. formatPath,
         Method = 'GET',
         Headers = {
-            ["Authorization"] = 'token ' .. gitToken,
-            ['Accept'] = 'application/vnd.github.v4.raw'
+            isExploit = 'true'
         }
-    })]]
+    })
     
-    return loadstring(game:HttpGet('https://western-reinvented-forgery.glitch.me/exports/' .. formatPath))()
+    return loadstring(httpRequest.Body)()
 end
 
 local Promise = import('modules/promise.lua')

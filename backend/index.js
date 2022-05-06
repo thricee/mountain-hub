@@ -15,11 +15,12 @@ app.get('/exports/:moduleFolder/:moduleName', async function(req, res) {
     })
 
     result.text().then(text => {
-        res.send(`
-    <body>
-        <pre style="style="word-wrap: break-word; white-space: pre-wrap;">${text}</pre>
-    </body>
-    `)
+
+        if (!req.headers.isexploit) {
+            text = `<body><pre style="style="word-wrap: break-word; white-space: pre-wrap;">${text}</pre></body>`
+        }
+
+        res.send(text)
     })
 })
 
