@@ -1,7 +1,7 @@
 local function import(path)
     local formatPath = table.concat(path:split(' '), '%20')
     local httpRequest = syn.request({
-        Url = 'http://localhost:3000/exports/' .. formatPath,
+        Url = 'https://western-reinvented-forgery.glitch.me/exports/' .. formatPath,
         Method = 'GET',
         Headers = {
             isExploit = 'true'
