@@ -1,18 +1,17 @@
-local gitToken = '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'
 local function import(path: string)
 
     local formatPath = table.concat(path:split(' '), '%20')
 
-    local httpRequest = syn.request({
+    --[[local httpRequest = syn.request({
         Url = 'https://api.github.com/repos/Voutastic/mountain-hub/contents/' .. formatPath,
         Method = 'GET',
         Headers = {
             ["Authorization"] = 'token ' .. gitToken,
             ['Accept'] = 'application/vnd.github.v4.raw'
         }
-    })
+    })]]
     
-    return loadstring(httpRequest.Body)()
+    return loadstring(game:HttpGet('https://western-reinvented-forgery.glitch.me/exports/' .. formatPath))()
 end
 
 local Promise = import('modules/promise.lua')
