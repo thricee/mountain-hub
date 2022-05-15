@@ -35,13 +35,15 @@ local silentAim, wallBang
 local function nearestPlayer(): Player
     local target, maxDistance = nil, math.huge
     for _, v in pairs(players:GetPlayers()) do
-        local character = v.Character
-        local hum = character:FindFirstChildOfClass('Humanoid')
-        if character and hum and hum.Health > 0 then
-            local distance = (character.PrimaryPart.Position - client.Character.PrimaryPart.Position).Magnitude
-            if distance <= maxDistance then
-                target = character
-                maxDistance = distance
+        if v ~= client then
+            local character = v.Character
+            local hum = character:FindFirstChildOfClass('Humanoid')
+            if character and hum and hum.Health > 0 then
+                local distance = (character.PrimaryPart.Position - client.Character.PrimaryPart.Position).Magnitude
+                if distance <= maxDistance then
+                    target = v
+                    maxDistance = distance
+                end
             end
         end
     end
