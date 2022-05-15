@@ -66,7 +66,7 @@ bowClientEnv.CreateRay = function(character: Model, head: BasePart, bow: Tool , 
         return oldCreateRay(character, head, bow, finalAim)
     end
     local hitPart, hitPoint
-    local targetCharacter
+    local targetCharacter = nearestPlayer().Character
 
     rayParams.FilterDescendantsInstances = {targetCharacter}
     rayParams.FilterType = Enum.RaycastFilterType.Whitelist
