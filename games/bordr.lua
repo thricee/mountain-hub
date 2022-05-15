@@ -79,7 +79,12 @@ end
 local oldCreateRay = bowClientEnv.CreateRay
 bowClientEnv.CreateRay = function(character: Model, head: BasePart, bow: Tool , finalAim: Vector3)
     local oldResult = oldCreateRay(character, head, bow, finalAim)
-    local targetCharacter = nearestPlayer(true).Character or currentNearest
+    local targetCharacter = nearestPlayer(true)
+    if not targetCharacter then
+        return oldResult
+    end
+
+    targetCharacter = targetCharacter.Character or currentNearest
     if not wallBang or not targetCharacter then
         return oldResult
     end
