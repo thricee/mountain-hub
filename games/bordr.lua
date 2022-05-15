@@ -44,7 +44,7 @@ local function nearestPlayer(toMouse: boolean): Player
             if character and hum and hum.Health > 0 then
                 local distance = (character.PrimaryPart.Position - client.Character.PrimaryPart.Position).Magnitude
                 if toMouse then
-                    local vector: Vector3, onScreen = currentCamera:WorldToScreenPoint(character.PrimaryPart.Position)
+                    local vector, onScreen = currentCamera:WorldToScreenPoint(character.PrimaryPart.Position)
                     if not onScreen then
                         continue
                     end
