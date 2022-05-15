@@ -62,22 +62,37 @@ local function nearestPlayer(toMouse: boolean): Player
     return target
 end
 
+local currentNearest
+
 local oldGetFinalAim = bowClientEnv.GetFinalAim
 bowClientEnv.GetFinalAim = function(bow: Tool)
+    local oldResult = oldGetFinalAim(bow)
     if not silentAim then
-        return oldGetFinalAim(bow)
+        return oldResult
     end
 
-    return nearestPlayer(true).Character.PrimaryPart.Position
+    local target = nearestPlayer(true)
+    
+    if target then
+        currentNearest = target
+        return target.Character.PrimaryPart.Position
+    else
+        return oldResult
+    end
 end
 
 local oldCreateRay = bowClientEnv.CreateRay
 bowClientEnv.CreateRay = function(character: Model, head: BasePart, bow: Tool , finalAim: Vector3)
+    local oldResult = oldCreateRay(character, head, bow, finalAim)
     if not wallBang then
-        return oldCreateRay(character, head, bow, finalAim)
+        return oldResult
     end
     local hitPart, hitPoint
-    local targetCharacter = nearestPlayer(true).Character
+    local targetCharacter = nearestPlayer(true).Character or currentNearest
+
+    if not targetCharacter then
+        return oldResult
+    end
 
     rayParams.FilterDescendantsInstances = {targetCharacter}
     rayParams.FilterType = Enum.RaycastFilterType.Whitelist
