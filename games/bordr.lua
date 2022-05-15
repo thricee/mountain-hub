@@ -31,15 +31,26 @@ local bowClientEnv = getsenv(bowClient)
 
 local rayParams = RaycastParams.new()
 local silentAim, wallBang
+local currentCamera = workspace.CurrentCamera
 
-local function nearestPlayer(): Player
+local clientMouse = client:GetMouse()
+
+local function nearestPlayer(toMouse: boolean): Player
     local target, maxDistance = nil, math.huge
     for _, v in pairs(players:GetPlayers()) do
-        if v ~= client then
-            local character = v.Character
+        local character = v.Character
+        if v ~= client and character then
             local hum = character:FindFirstChildOfClass('Humanoid')
             if character and hum and hum.Health > 0 then
                 local distance = (character.PrimaryPart.Position - client.Character.PrimaryPart.Position).Magnitude
+                if toMouse then
+                    local vector: Vector3, onScreen = currentCamera:WorldToScreenPoint(character.PrimaryPart.Position)
+                    if not onScreen then
+                        continue
+                    end
+
+                    distance = (Vector2.new(clientMouse.X, clientMouse.Y) - Vector2.new(vector.X, vector.Y)).Magnitude
+                end
                 if distance <= maxDistance then
                     target = v
                     maxDistance = distance
@@ -57,7 +68,7 @@ bowClientEnv.GetFinalAim = function(bow: Tool)
         return oldGetFinalAim(bow)
     end
 
-    return nearestPlayer().Character.PrimaryPart.Position
+    return nearestPlayer(true).Character.PrimaryPart.Position
 end
 
 local oldCreateRay = bowClientEnv.CreateRay
@@ -66,7 +77,7 @@ bowClientEnv.CreateRay = function(character: Model, head: BasePart, bow: Tool , 
         return oldCreateRay(character, head, bow, finalAim)
     end
     local hitPart, hitPoint
-    local targetCharacter = nearestPlayer().Character
+    local targetCharacter = nearestPlayer(true).Character
 
     rayParams.FilterDescendantsInstances = {targetCharacter}
     rayParams.FilterType = Enum.RaycastFilterType.Whitelist
